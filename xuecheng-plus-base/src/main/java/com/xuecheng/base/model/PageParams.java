@@ -1,31 +1,26 @@
 package com.xuecheng.base.model;
 
-import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
- * @author Mr.M
- * @version 1.0
- * @description 分页查询分页参数
- * @date 2023/2/11 15:33
+ * @Package:com.xuecheng.base.model
+ * @Auther:Brianwei
+ * @date:2024/1/20:23:36
+ * @discribe: 分页查询条件模型
  */
+
 @Data
+@AllArgsConstructor
 @ToString
+@NoArgsConstructor
 public class PageParams {
 
     //当前页码
-    @ApiModelProperty("页码")
-    private Long pageNo = 1L;
-    //每页显示记录数
-    @ApiModelProperty("每页记录数")
-    private Long pageSize = 30L;
+    private Long pageNo;       //mybatisplus分页的类型就是long，方便接收
 
-    public PageParams() {
-    }
-
-    public PageParams(Long pageNo, Long pageSize) {
-        this.pageNo = pageNo;
-        this.pageSize = pageSize;
-    }
+    //每页记录数默认值
+    private Long pageSize;
 }

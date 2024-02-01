@@ -8,9 +8,20 @@ spring:
     name: content-api
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.101.65:3306/xc402_content?serverTimezone=UTC&userUnicode=true&useSSL=false&
+    url: jdbc:mysql://192.168.36.111:3306/xc_content?serverTimezone=UTC&userUnicode=true
     username: root
-    password: mysql
+    password: root
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: akabrianwei2021@gmail.com
+    password: notime918020
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 # 日志文件配置路径
 logging:
   config: classpath:log4j2-dev.xml
@@ -21,3 +32,4 @@ swagger:
   base-package: com.xuecheng.content
   enabled: true
   version: 1.0.0
+

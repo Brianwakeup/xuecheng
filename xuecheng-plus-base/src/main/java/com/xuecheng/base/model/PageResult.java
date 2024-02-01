@@ -1,39 +1,32 @@
 package com.xuecheng.base.model;
 
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.List;
 
 /**
- * @author Mr.M
- * @version 1.0
- * @description 分页查询结果模型类
- * @date 2023/2/11 15:40
+ * @Package:com.xuecheng.base.model
+ * @Auther:Brianwei
+ * @date:2024/1/21:0:12
+ * @discribe: 分页查询结果模型
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @ToString
+@Builder
 public class PageResult<T> implements Serializable {
 
-    // 数据列表
+    //数据列表
     private List<T> items;
 
     //总记录数
-    private long counts;
+    private Long counts;
 
     //当前页码
-    private long page;
+    private Long page;
 
     //每页记录数
-    private long pageSize;
-
-    public PageResult(List<T> items, long counts, long page, long pageSize) {
-        this.items = items;
-        this.counts = counts;
-        this.page = page;
-        this.pageSize = pageSize;
-    }
-
-
+    private Long pageSize;
 }

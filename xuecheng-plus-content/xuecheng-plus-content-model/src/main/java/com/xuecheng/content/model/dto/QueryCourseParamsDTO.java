@@ -1,17 +1,21 @@
 package com.xuecheng.content.model.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
- * @author Mr.M
- * @version 1.0
- * @description 课程查询条件模型类
- * @date 2023/2/11 15:37
+ * @Package:com.xuecheng.content.model.dto
+ * @Auther:Brianwei
+ * @date:2024/1/21:16:00
+ * @discribe:
  */
 @Data
+@AllArgsConstructor
 @ToString
-public class QueryCourseParamsDto {
+@NoArgsConstructor
+public class QueryCourseParamsDTO {
 
     //审核状态
     private String auditStatus;
@@ -19,5 +23,4 @@ public class QueryCourseParamsDto {
     private String courseName;
     //发布状态
     private String publishStatus;
-
 }
