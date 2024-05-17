@@ -13,4 +13,6 @@ import org.springframework.stereotype.Repository;
  */
 public interface TeachplanMediaMapper extends BaseMapper<TeachplanMedia> {
 
+    TeachplanMedia getTeachplanMediaByTeachPlanId(Long id);
+
 }
