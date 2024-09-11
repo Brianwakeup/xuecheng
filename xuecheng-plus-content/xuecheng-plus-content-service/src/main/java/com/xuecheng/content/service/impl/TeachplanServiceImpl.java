@@ -41,7 +41,6 @@ public class TeachplanServiceImpl implements TeachplanService {
     @Autowired
     CourseBaseMapper courseBaseMapper;
 
-
     public List<TeachplanVO> getTeachPlan(Long id) {
         if (courseBaseMapper.selectById(id) == null){
             XueChengPlusException.cast("当前课程不存在");
@@ -313,6 +312,33 @@ public class TeachplanServiceImpl implements TeachplanService {
         teachplanMedia.setMediaFilename(bindTeachplanMediaVO.getFileName());
         teachplanMediaMapper.insert(teachplanMedia);
         return teachplanMedia;
+    }
+
+    @Override
+    @Transactional
+    public void deleteAssociationMedia(Long teachPlanId, String mediaId) {
+        //先查询 再删除
+        Teachplan teachplan = teachplanMapper.selectById(teachPlanId);
+        if (teachplan == null){
+            XueChengPlusException.cast("没有找到课程计划");
+        }
+        //校验mediaid和teachplanid是否一致
+        TeachplanMedia teachplanMedia = teachplanMediaMapper.selectOne(
+                new LambdaQueryWrapper<TeachplanMedia>()
+                        .eq(TeachplanMedia::getTeachplanId, teachPlanId)
+        );
+        System.out.println(mediaId + "  " + teachplanMedia.getMediaId());
+        if (!teachplanMedia.getMediaId().equals(mediaId)){
+            XueChengPlusException.cast("数据不一致");
+        }
+        //查询到了，删除计划关联的媒资文件
+        int delete = teachplanMediaMapper.delete(
+                new LambdaQueryWrapper<TeachplanMedia>()
+                        .eq(TeachplanMedia::getTeachplanId, teachPlanId)
+        );
+        if (delete <= 0){
+            XueChengPlusException.cast("删除失败");
+        }
     }
 
     //根据传进来的教学计划id判断教学计划和课程是否存在

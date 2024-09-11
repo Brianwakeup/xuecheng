@@ -1,4 +1,4 @@
-package com.xuecheng.media.config;
+package com.xuecheng.content.config;
 
 import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
 import org.slf4j.Logger;
@@ -8,9 +8,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * xxl-job config
- *
- * @author xuxueli 2017-04-28
+ * @Package:com.xuecheng.content.config
+ * @Auther:Brianwei
+ * @date:2024/8/13:14:34
+ * @discribe:
  */
 @Configuration
 public class XxlJobConfig {

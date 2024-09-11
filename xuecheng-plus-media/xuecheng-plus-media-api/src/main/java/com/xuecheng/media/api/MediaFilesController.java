@@ -9,12 +9,10 @@ import com.xuecheng.media.model.po.MediaFiles;
 import com.xuecheng.media.service.MediaFileService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -48,18 +46,44 @@ public class MediaFilesController {
 
     @ApiOperation("上传图片")
     @PostMapping(value = "/upload/coursefile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public UploadFileResultDto upload(@RequestPart("filedata") MultipartFile file) throws IOException {
+    public UploadFileResultDto upload(@RequestPart("filedata") MultipartFile file,
+                                      @RequestParam(value = "objectName", required = false)
+                                      String objectName) throws IOException {
         UploadFIleParamsDto uploadFIleParamsDto = new UploadFIleParamsDto();
         uploadFIleParamsDto.setFilename(file.getOriginalFilename());
         uploadFIleParamsDto.setFileType("001001");
+        if (!StringUtils.isEmpty(objectName)){
+            uploadFIleParamsDto.setFileType("001003");
+        }
         uploadFIleParamsDto.setFileSize(file.getSize());
+
         // 创建一个临时文件名为"minio"，后缀为".temp"
         File minio = File.createTempFile("minio", ".temp");
-        // 将上传的 MultipartFile 的内容传输到临时文件中
-        file.transferTo(minio);
-        Long companyId = 1232141425l;
-        String filepath = minio.getAbsolutePath();
-        UploadFileResultDto uploadFileResultDto = mediaFileService.upload(companyId, uploadFIleParamsDto, filepath);
-        return uploadFileResultDto;
+        try {
+            // 将上传的 MultipartFile 的内容传输到临时文件中
+            file.transferTo(minio);
+            Long companyId = 1232141425L;
+            String filepath = minio.getAbsolutePath();
+            UploadFileResultDto uploadFileResultDto = mediaFileService.upload(companyId, uploadFIleParamsDto, filepath, objectName);
+            return uploadFileResultDto;
+        } finally {
+            // 尝试删除临时文件
+            if (!minio.delete()) {
+                System.err.println("Failed to delete temporary file: " + minio.getAbsolutePath());
+            }
+        }
+    }
+
+
+    @DeleteMapping("/{mediaFilesId}")
+    @ApiOperation("删除媒资文件")
+    public void deleteMediaFiles(@PathVariable String mediaFilesId){
+        mediaFileService.deleteMediaFiles(mediaFilesId);
+    }
+
+    @GetMapping("/preview")
+    @ApiOperation("预览媒资文件")
+    public void previewMediaFiles(){
+
     }
 }

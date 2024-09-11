@@ -59,7 +59,7 @@ public class MinioTest {
         minioClient.removeObject(
                 RemoveObjectArgs.builder()
                         .bucket("video")
-                        .object("c")
+                        .object("c/f/cfff06965ea58156c765d2408737d351")
                         .build()
         );
     }

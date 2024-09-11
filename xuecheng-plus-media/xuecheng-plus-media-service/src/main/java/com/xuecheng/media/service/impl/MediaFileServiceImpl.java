@@ -17,6 +17,7 @@ import com.xuecheng.media.model.po.MediaProcess;
 import com.xuecheng.media.model.po.MediaProcessHistory;
 import com.xuecheng.media.service.MediaFileService;
 import io.minio.MinioClient;
+import io.minio.RemoveObjectArgs;
 import io.minio.UploadObjectArgs;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -83,29 +84,38 @@ public class MediaFileServiceImpl implements MediaFileService {
         return mediaListResult;
     }
 
+    /**
+     *
+     * @param companyId
+     * @param uploadFIleParamsDto
+     * @param filepath
+     * @return
+     */
     @Override
-    public UploadFileResultDto upload(Long companyId, UploadFIleParamsDto uploadFIleParamsDto, String filepath) {
+    public UploadFileResultDto upload(Long companyId, UploadFIleParamsDto uploadFIleParamsDto, String filepath,String objectName) {
         //先得到扩展名
         String filename = uploadFIleParamsDto.getFilename();
-        String extentionName = filename.substring(filename.lastIndexOf("."));
-        String mimeType = getMimeType(extentionName);
+        String extensionName = filename.substring(filename.lastIndexOf("."));
+        String mimeType = getMimeType(extensionName);
         //先获取要存入的文件路径
         String defalutFolderPath = getDefalutFolderPath();
         //拿到文件的md5值再进行拼接
         String md5 = getMd5(filepath);
-        //再得到obj文件名
-        String objname = defalutFolderPath + md5 + extentionName;
+        //再得到obj文件名,如果没传，那么就是年月日路径
+        if (StringUtils.isEmpty(objectName)){
+            objectName = defalutFolderPath + md5 + extensionName;
+        }
         //将文件上传到minio
         //如果网络请求的时间长了，那么事务就会占用数据库的资源，极端情况下导致数据库连接不够用，所以需要进行事务优化
         //但是非事务方法调用同类的一个事务方法，事务无法控制
-        boolean b = addMeidaFileToMinio(filepath, mimeType, bucket_files, objname);
+        boolean b = addMeidaFileToMinio(filepath, mimeType, bucket_files, objectName);
         if (!b) {
             XueChengPlusException.cast("上传文件失败");
         }
         //成功了才会写入数据库
         //将文件信息保存到数据库
         //因为接口注入的是代理对象，所以自己注入自己的实现类可以解决在非事务方法中调用事务方法无法控制事务的情况
-        MediaFiles mediaFiles = current.addMediaFilesToDb(companyId, uploadFIleParamsDto, md5, bucket_files, objname);
+        MediaFiles mediaFiles = current.addMediaFilesToDb(companyId, uploadFIleParamsDto, md5, bucket_files, objectName);
         if (mediaFiles == null){
             XueChengPlusException.cast("文件上传后保存文件失败");
         }
@@ -208,6 +218,37 @@ public class MediaFileServiceImpl implements MediaFileService {
         List<MediaFiles> mediaFiles = mediaFilesMapper.selectList(wrapper);
         PageResult<MediaFiles> result = new PageResult<>(mediaFiles,Long.valueOf(mediaFiles.size()),null,null);
         return result;
+    }
+
+    @Override
+    public String getMediaFileUrlById(String mediaId) {
+        MediaFiles mediaFiles = mediaFilesMapper.selectById(mediaId);
+        if (mediaFiles == null || mediaFiles.getUrl() == null){
+            return null;
+        }
+        return mediaFiles.getUrl();
+    }
+
+    @Override
+    @Transactional
+    public void deleteMediaFiles(String mediaFilesId) {
+        MediaFiles mediaFiles = mediaFilesMapper.selectById(mediaFilesId);
+        //先删除minio文件，再删除表数据
+        try {
+            minioClient.removeObject(
+                    RemoveObjectArgs.builder()
+                            .bucket(mediaFiles.getBucket())
+                            .object(mediaFiles.getFilePath())
+                            .build());
+        } catch (Exception e){
+            XueChengPlusException.cast(e.getMessage());
+        }
+        //删除成功
+        //删除表数据
+        int i = mediaFilesMapper.deleteById(mediaFilesId);
+        if (i <= 0){
+            XueChengPlusException.cast("删除数据失败");
+        }
     }
 
     static String getMimeType(String extention) {

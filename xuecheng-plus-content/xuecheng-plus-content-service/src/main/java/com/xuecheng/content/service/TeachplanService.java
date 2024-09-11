@@ -27,4 +27,6 @@ public interface TeachplanService {
     public void saveTeachplan(SaveTeachplanDto saveTeachplanDto);
 
     TeachplanMedia associationMedia(BindTeachplanMediaVO bindTeachplanMediaVO);
+
+    void deleteAssociationMedia(Long teachPlanId, String mediaId);
 }
